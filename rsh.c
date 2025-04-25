@@ -51,11 +51,11 @@ void* messageListener(void *arg) {
 	struct message req;
 	int user = open(uName, O_RDONLY);
 	while(1) {
-		if(read(user, &req, sizeof(struct message)) != sizeof(struct message)){
+	    int size = read(user, &req, sizeof(struct message));
+		if(size != sizeof(struct message)){
 		    continue;
 		}
-		printf("Incoming message from %s", req.source);
-	    printf(": %s\n",req.msg);
+		printf("Incoming message from %s: %s\n", req.source, req.msg);
 	}
 	close(user);
 	pthread_exit((void*)0);
@@ -92,8 +92,6 @@ int main(int argc, char **argv) {
 
 	pthread_t tid;
 	pthread_create(&tid, NULL, messageListener, NULL);
-
-
 	while (1) {
 
 		fprintf(stderr,"rsh>");
@@ -138,10 +136,12 @@ int main(int argc, char **argv) {
 				printf("sendmsg: you have to enter a message\n");
 				continue;
 			}
+			strcpy(message, nextToken); 
+			nextToken = strtok(NULL, " ");
 
 			while(nextToken!= NULL) {
-				strcat(message, nextToken);
 				strcat(message, " ");
+				strcat(message, nextToken);
 				nextToken = strtok(NULL, " ");
 			}
 

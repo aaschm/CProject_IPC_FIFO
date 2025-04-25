@@ -56,6 +56,7 @@ void* messageListener(void *arg) {
 		    continue;
 		}
 		printf("Incoming message from %s: %s\n", req.source, req.msg);
+		fprintf(stderr,"rsh>");
 	}
 	close(user);
 	pthread_exit((void*)0);
@@ -93,7 +94,6 @@ int main(int argc, char **argv) {
 	pthread_t tid;
 	pthread_create(&tid, NULL, messageListener, NULL);
 	while (1) {
-
 		fprintf(stderr,"rsh>");
 
 		if (fgets(line,256,stdin)==NULL) continue;
@@ -120,8 +120,8 @@ int main(int argc, char **argv) {
 			char targetUName[20];
 			char message[200];
             
-			memset(message, 0, sizeof(message));
-			memset(targetUName, 0, sizeof(targetUName));
+			memset(message, '\0', sizeof(message));
+			memset(targetUName, '\0', sizeof(targetUName));
 			
 			//get the username from the line string
 			nextToken = strtok(NULL, " ");

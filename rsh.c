@@ -56,7 +56,6 @@ void* messageListener(void *arg) {
 		    continue;
 		}
 		printf("Incoming message from %s: %s\n", req.source, req.msg);
-		fprintf(stderr,"rsh>");
 	}
 	close(user);
 	pthread_exit((void*)0);
@@ -88,6 +87,7 @@ int main(int argc, char **argv) {
 
 	strcpy(uName,argv[1]);
 
+
 	// TODO:
 	// create the message listener thread
 
@@ -95,6 +95,7 @@ int main(int argc, char **argv) {
 	pthread_create(&tid, NULL, messageListener, NULL);
 	while (1) {
 		fprintf(stderr,"rsh>");
+		fflush(stderr);
 
 		if (fgets(line,256,stdin)==NULL) continue;
 
@@ -144,6 +145,10 @@ int main(int argc, char **argv) {
 				strcat(message, nextToken);
 				nextToken = strtok(NULL, " ");
 			}
+
+			//int length = strlen(message);
+			//printf("this is the size of your message: %d\n", length);
+
 
 			sendmsg(uName, targetUName,message);
 

@@ -95,7 +95,6 @@ int main(int argc, char **argv) {
 	pthread_create(&tid, NULL, messageListener, NULL);
 	while (1) {
 		fprintf(stderr,"rsh>");
-		fflush(stderr);
 
 		if (fgets(line,256,stdin)==NULL) continue;
 
@@ -146,11 +145,9 @@ int main(int argc, char **argv) {
 				nextToken = strtok(NULL, " ");
 			}
 
-			//int length = strlen(message);
-			//printf("this is the size of your message: %d\n", length);
 
 
-			sendmsg(uName, targetUName,message);
+			sendmsg(uName, targetUName, message);
 
 			// NOTE: The message itself can contain spaces
 			// If the user types: "sendmsg user1 hello there"
@@ -161,8 +158,6 @@ int main(int argc, char **argv) {
 			// printf("sendmsg: you have to specify target user\n");
 			// if no message is specified, you should print the followingA
 			// printf("sendmsg: you have to enter a message\n");
-
-
 			continue;
 		}
 

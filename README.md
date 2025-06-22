@@ -1,64 +1,50 @@
-# Project4: Inter Process Communication Using FIFOs
+# Project 4: Inter-Process Communication with FIFOs
 
-In this project, you are going to extend the restricted shell, rsh, by adding a new built-in command to send messages to other users. The 13th command, **sendmsg**, can be uses as in the following example:
+## 🧩 Overview
 
-```
-rsh>sendmsg user2 hello there!
-```
+This project extends a previously built restricted shell (`rsh`) by adding basic inter-process communication (IPC) capabilities using **named pipes (FIFOs)**. The enhancement introduces a new built-in command, `sendmsg`, which allows users running different instances of the shell to send text messages to one another in real time.
 
-The command above should send the message "hello there!" to user **user2**. Note that the message is not enclosed within quotes.
+The goal is to demonstrate user-level message passing using standard Linux system calls, without relying on sockets or complex networking — just pure FIFO-based IPC.
 
-In this project, you will complete the missing pieces in the server and the client code. The places marked as "**TODO:**" described the expected behavious of the code snippet you will be adding at those locations.
-Specifically, you will update **server.c** and **rsh.c** to obtain a working shell with messaging capabilities. 
+---
 
-### Compiling, Running, and Testing Your Code
+## ✉️ Key Feature: `sendmsg`
 
-You can compile the server by typing **make server** and compile the client by typing **make rsh**. In order to test your code, you should first create 3 FIFOs like below:
+The `sendmsg` command lets one shell user send a message to another. Example:
 
-```
-mkfifo serverFIFO
-mkfifo user1
-mkfifo user2
-```
+```bash
+rsh> sendmsg user2 hello there!
 
-These are the server and the client FIFOs. You can then run the server by typing "./server &" to run it in the background. Don't forget to kill the process after your finished with your testing. You can also run it in the foreground and run the client processes on different terminals.
+## 🏗️ System Architecture
 
-In order to run a client, you execute rsh with the user name command line argument like below:
+The system consists of three major components:
 
-```
-./rsh user1
-```
+### 🔧 Server (`server.c`)
 
-You can then run a different client on a different terminal with username user2. Make sure your user names match the FIFOs you have created. If you have completed the implementation correctly, you should be able to send messages and see the messages arrive at the other user's rsh prompt.
+- A background process that listens on a common FIFO (`serverFIFO`).
+- It receives messages from clients and forwards them to the appropriate user’s FIFO (e.g., `user1`, `user2`).
+- Acts as the central hub for routing messages between users.
 
-This project will have only one test case, which is publicly available in the "test" directory. You can inspect the inputs and the expected outputs for each of the 3 processes in a session with a server and two clients.
+### 🖥️ Client Shell (`rsh.c`)
 
-### Github Repo Setup and Gradescope Submission Instructions
+An interactive restricted shell that supports:
 
-The setup of the git repo is similar to the one for Project 2 and Project 3. Refer to those instructions for your github repo setup. You can use the same ssh key you generated in Project 2 for all of your projects.
+- Basic commands (`cp`, `ls`, `pwd`, etc.)
+- Built-in shell features (`cd`, `exit`, `help`)
+- Messaging (`sendmsg`)
 
-For Project 4, create a separate private repository specific for this project under your own user name. For example, I created a private repo named **csci210_project4** and my github username is tolgacan. A private repo can be created from the GitHub web site by going to your repositories after clicking on your profile picture (e.g., https://github.com/tolgacan?tab=repositories) and clicking on the "New" button in the top right corner. After that, you can enter a command sequence similar to the one below to clone the starter repo and copy it to your private repo to work with. The **project4_spring24** repo under the organization **CSCI210Mines** is the public repository that contains the code that you will be working on.
+Each client instance identifies itself by a username passed as an argument and listens for messages on a FIFO with the same name.
 
-```
-git clone git@github.com:CSCI210Mines/project4_spring25.git
-cd project4_spring25
-git remote remove origin
-git remote add origin git@github.com:tolgacan/csci210_project4.git  # this is my private repo. replace it with your own private repo
-git branch -M main
-git push -u origin main
-```
+### 🧵 FIFOs (Named Pipes)
 
-After these commands, you should have a copy of your starter code in your own repo and you can update **rsh.c** and **server.c** by completing the parts marked with "**TODO:**". You can compile the server by typing "make server" and compile the client by typing "make rsh". You can execute the following git commands to push your updates to your own repo:
+- `serverFIFO`: Shared FIFO where clients send their outbound messages for the server to dispatch.
+- `user1`, `user2`, etc.: Individual FIFOs where each client receives messages directed at them.
 
-```
-git add rsh.c
-git add server.c
-git commit -m "your commit message here"
-git push -u origin main
-```
+## 💬 Communication Flow
 
-You can also clone your repo and work on it and push the updates from different machines if you add the ssh public keys for these machines to your github profile.
+- A user types `sendmsg user2 hello!` in their `rsh` shell.
+- The client writes this message to `serverFIFO`.
+- The server reads the message, parses the target username, and writes the message to `user2`’s FIFO.
+- The `rsh` shell running as `user2` reads the message and displays it instantly in the shell.
 
-**Submission on Gradescope:**
-
-After you are logged in to your github account in a browser, if you follow the Gradescope assignment page for this project from Canvas and try to upload a submission, you will be able to select the Github submission options and select your private repository for this project to submit your solution on Gradescope.
+> If the target user's FIFO does not exist or the user is not online, the message is dropped (no acknowledgment or delivery guarantee is implemented).

@@ -1,6 +1,6 @@
 # Project 4: Inter-Process Communication with FIFOs
 
-## 🧩 Overview
+## Overview
 
 This project extends a previously built restricted shell (`rsh`) by adding basic inter-process communication (IPC) capabilities using **named pipes (FIFOs)**. The enhancement introduces a new built-in command, `sendmsg`, which allows users running different instances of the shell to send text messages to one another in real time.
 
@@ -8,14 +8,14 @@ The goal is to demonstrate user-level message passing using standard Linux syste
 
 ---
 
-## ✉️ Key Feature: `sendmsg`
+## Key Feature: `sendmsg`
 
 The `sendmsg` command lets one shell user send a message to another. Example:
 
 ```bash
 rsh> sendmsg user2 hello there!
-
-## 🏗️ System Architecture
+```
+## System Architecture
 
 The system consists of three major components:
 
@@ -40,7 +40,7 @@ Each client instance identifies itself by a username passed as an argument and l
 - `serverFIFO`: Shared FIFO where clients send their outbound messages for the server to dispatch.
 - `user1`, `user2`, etc.: Individual FIFOs where each client receives messages directed at them.
 
-## 💬 Communication Flow
+## Communication Flow
 
 - A user types `sendmsg user2 hello!` in their `rsh` shell.
 - The client writes this message to `serverFIFO`.
